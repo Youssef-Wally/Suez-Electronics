@@ -83,6 +83,8 @@ function App() {
     return savedCart ? JSON.parse(savedCart) : [];
   });
 
+  const [user, setUser] = useState(null); // عشان نخزن اسم المستخدم بعد ما يدخل
+
   const [selectedProduct, setSelectedProduct] = useState(null);
 
   function removeFromCart(indexToRemove) {
@@ -202,10 +204,152 @@ function App() {
                   </span>
                 )}
               </button>
+              <button className="nav-link btn" onClick={() => setPage("login")}>
+                Login
+              </button>
             </div>
           </div>
         </div>
       </nav>
+
+      {page === "login" && (
+        <div className="container mt-5 mb-5 animate__animated animate__fadeIn">
+          <div className="row justify-content-center">
+            <div className="col-md-5">
+              <div className="card shadow-lg border-0 rounded-5 p-4">
+                <div className="text-center mb-4">
+                  <h2 className="fw-bold text-primary">Welcome Back!</h2>
+                  <p className="text-muted">
+                    سجل دخولك لمتابعة الشراء في Suez Electronics
+                  </p>
+                </div>
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    setUser({ name: "Youssef Wally" }); // تجريبي
+                    setPage("products");
+                  }}
+                >
+                  <div className="mb-3">
+                    <label className="form-label fw-bold">
+                      البريد الإلكتروني
+                    </label>
+                    <input
+                      type="email"
+                      className="form-control rounded-pill p-3"
+                      placeholder="name@example.com"
+                      required
+                    />
+                  </div>
+                  <div className="mb-4">
+                    <label className="form-label fw-bold">كلمة المرور</label>
+                    <input
+                      type="password"
+                      className="form-control rounded-pill p-3"
+                      placeholder="********"
+                      required
+                    />
+                  </div>
+                  <button className="btn btn-primary w-100 rounded-pill py-3 fw-bold shadow">
+                    تسجيل الدخول 🚀
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {page === "checkout" && (
+        <div className="container mt-5 mb-5 animate__animated animate__fadeIn">
+          <h2 className="fw-bold mb-4 text-center">إتمام عملية الشراء 💳</h2>
+          <div className="row g-4">
+            {/* فورم البيانات */}
+            <div className="col-md-8">
+              <div className="card shadow-sm border-0 rounded-4 p-4">
+                <h5 className="mb-4 border-bottom pb-2 fw-bold">
+                  بيانات الشحن
+                </h5>
+                <div className="row g-3">
+                  <div className="col-md-6">
+                    <label className="form-label">الاسم بالكامل</label>
+                    <input
+                      type="text"
+                      className="form-control rounded-3"
+                      placeholder="يوسف وائل"
+                      required
+                    />
+                  </div>
+                  <div className="col-md-6">
+                    <label className="form-label">رقم الهاتف</label>
+                    <input
+                      type="tel"
+                      className="form-control rounded-3"
+                      placeholder="010XXXXXXXX"
+                      required
+                    />
+                  </div>
+                  <div className="col-md-12">
+                    <label className="form-label">
+                      العنوان بالتفصيل (السويس)
+                    </label>
+                    <input
+                      type="text"
+                      className="form-control rounded-3"
+                      placeholder="شارع الجيش - برج..."
+                      required
+                    />
+                  </div>
+                </div>
+
+                <h5 className="mt-5 mb-4 border-bottom pb-2 fw-bold">
+                  طريقة الدفع
+                </h5>
+                <div className="form-check mb-3">
+                  <input
+                    className="form-check-input"
+                    type="radio"
+                    name="payment"
+                    id="cash"
+                    checked
+                    readOnly
+                  />
+                  <label className="form-check-input-label" htmlFor="cash">
+                    الدفع عند الاستلام (Cash on Delivery)
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            {/* ملخص الطلب */}
+            <div className="col-md-4">
+              <div className="card shadow-sm border-0 rounded-4 p-4 bg-light">
+                <h5 className="fw-bold mb-3">ملخص الطلب</h5>
+                <div className="d-flex justify-content-between mb-2">
+                  <span>عدد المنتجات:</span>
+                  <span className="fw-bold">{cart.length}</span>
+                </div>
+                <div className="d-flex justify-content-between mb-3 border-top pt-2 fs-5 fw-bold text-primary">
+                  <span>الإجمالي الإجمالي:</span>
+                  <span>{total.toFixed(2)} EGP</span>
+                </div>
+                <button
+                  className="btn btn-success w-100 rounded-pill py-3 fw-bold"
+                  onClick={() => {
+                    alert(
+                      "تم استلام طلبك بنجاح! فريق السويس إلكترونيكس هيكلمك في خلال ساعة.",
+                    );
+                    setCart([]);
+                    setPage("home");
+                  }}
+                >
+                  تأكيد الطلب ✅
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {page === "home" && (
         <div className="animate__animated animate__fadeIn">
@@ -445,7 +589,6 @@ function App() {
                 </div>
               </div>
             ))}{" "}
-            {/* <--- اتأكد إن القوس ده مقفول هنا */}
           </div>
         </div>
       )}
@@ -609,6 +752,7 @@ function App() {
                         fontWeight: "bold",
                         fontSize: "16px",
                       }}
+                      onClick={() => setPage("checkout")}
                     >
                       Proceed to checkout
                     </button>
