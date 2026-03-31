@@ -76,27 +76,26 @@ const products = [
     img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT4i0WWkqnttlC7HBPN6vvj_fYbdLRukQr_Lw&s",
   },
 ];
+
 function App() {
   const [cart, setCart] = useState(() => {
-    // بنقرأ الداتا فوراً أول ما الأبلكيشن يقوم
     const savedCart = localStorage.getItem("cart");
     return savedCart ? JSON.parse(savedCart) : [];
   });
 
-  const [user, setUser] = useState(null); // عشان نخزن اسم المستخدم بعد ما يدخل
-
+  const [user, setUser] = useState(null); 
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [page, setPage] = useState("home");
+  const [isNavOpen, setIsNavOpen] = useState(false);
+
+  useEffect(() => {
+    localStorage.setItem("cart", JSON.stringify(cart));
+  }, [cart]);
 
   function removeFromCart(indexToRemove) {
     const newCart = cart.filter((_, index) => index !== indexToRemove);
     setCart(newCart);
   }
-
-  const [page, setPage] = useState("home");
-
-  useEffect(() => {
-    localStorage.setItem("cart", JSON.stringify(cart));
-  }, [cart]);
 
   const subtotal = cart.reduce(
     (acc, item) => acc + item.price * (item.quantity || 1),
@@ -107,22 +106,17 @@ function App() {
 
   function addToCart(product) {
     setCart((prevCart) => {
-      // 1. بنشوف هل المنتج ده موجود فعلاً في الكارت؟
       const isItemInCart = prevCart.find((item) => item.id === product.id);
-
       if (isItemInCart) {
-        // 2. لو موجود، بنلف على الكارت ونزود الكمية للمنتج ده بس
         return prevCart.map((item) =>
           item.id === product.id
             ? { ...item, quantity: (item.quantity || 1) + 1 }
             : item,
         );
       }
-      // 3. لو مش موجود، بنضيفه ونحط له كمية 1
       return [...prevCart, { ...product, quantity: 1 }];
     });
   }
-  const [isNavOpen, setIsNavOpen] = useState(false);
 
   function updateQty(id, delta) {
     setCart((prevCart) =>
@@ -135,8 +129,8 @@ function App() {
   }
 
   return (
-    <div>
-      {/*  Navbar */}
+    <div className="font-monospace">
+      {/* Navbar */}
       <nav className="navbar navbar-expand-lg bg-white shadow-sm sticky-top p-3">
         <div className="container">
           <a
@@ -147,7 +141,6 @@ function App() {
             Suez <span className="text-dark">Electronics</span>
           </a>
 
-          {/* زرار الـ Hamburger للموبايل */}
           <button
             className="navbar-toggler border-0"
             type="button"
@@ -156,7 +149,6 @@ function App() {
             <span className="navbar-toggler-icon"></span>
           </button>
 
-          {/* المنيو - بتفتح وبتقفل بناءً على الـ state */}
           <div
             className={`collapse navbar-collapse ${isNavOpen ? "show" : ""}`}
             id="navbarNav"
@@ -205,35 +197,34 @@ function App() {
                 )}
               </button>
               <button className="nav-link btn" onClick={() => setPage("login")}>
-                Login
+                {user ? `Hi, ${user.name}` : "Login"}
               </button>
             </div>
           </div>
         </div>
       </nav>
 
+      {/* Login Page */}
       {page === "login" && (
         <div className="container mt-5 mb-5 animate__animated animate__fadeIn">
           <div className="row justify-content-center">
             <div className="col-md-5">
-              <div className="card shadow-lg border-0 rounded-5 p-4">
+              <div className="card shadow-lg border-0 rounded-5 p-4 text-start">
                 <div className="text-center mb-4">
                   <h2 className="fw-bold text-primary">Welcome Back!</h2>
                   <p className="text-muted">
-                    سجل دخولك لمتابعة الشراء في Suez Electronics
+                    Sign in to continue shopping at Suez Electronics
                   </p>
                 </div>
                 <form
                   onSubmit={(e) => {
                     e.preventDefault();
-                    setUser({ name: "Youssef Wally" }); // تجريبي
+                    setUser({ name: "Youssef" }); 
                     setPage("products");
                   }}
                 >
                   <div className="mb-3">
-                    <label className="form-label fw-bold">
-                      البريد الإلكتروني
-                    </label>
+                    <label className="form-label fw-bold">Email Address</label>
                     <input
                       type="email"
                       className="form-control rounded-pill p-3"
@@ -242,7 +233,7 @@ function App() {
                     />
                   </div>
                   <div className="mb-4">
-                    <label className="form-label fw-bold">كلمة المرور</label>
+                    <label className="form-label fw-bold">Password</label>
                     <input
                       type="password"
                       className="form-control rounded-pill p-3"
@@ -251,7 +242,7 @@ function App() {
                     />
                   </div>
                   <button className="btn btn-primary w-100 rounded-pill py-3 fw-bold shadow">
-                    تسجيل الدخول 🚀
+                    Sign In 🚀
                   </button>
                 </form>
               </div>
@@ -260,28 +251,28 @@ function App() {
         </div>
       )}
 
+      {/* Checkout Page */}
       {page === "checkout" && (
-        <div className="container mt-5 mb-5 animate__animated animate__fadeIn">
-          <h2 className="fw-bold mb-4 text-center">إتمام عملية الشراء 💳</h2>
+        <div className="container mt-5 mb-5 animate__animated animate__fadeIn text-start">
+          <h2 className="fw-bold mb-4 text-center">Checkout 💳</h2>
           <div className="row g-4">
-            {/* فورم البيانات */}
             <div className="col-md-8">
-              <div className="card shadow-sm border-0 rounded-4 p-4">
-                <h5 className="mb-4 border-bottom pb-2 fw-bold">
-                  بيانات الشحن
+              <div className="card shadow-sm border-0 rounded-4 p-4 text-start">
+                <h5 className="mb-4 border-bottom pb-2 fw-bold text-primary">
+                  Shipping Information
                 </h5>
                 <div className="row g-3">
                   <div className="col-md-6">
-                    <label className="form-label">الاسم بالكامل</label>
+                    <label className="form-label">Full Name</label>
                     <input
                       type="text"
                       className="form-control rounded-3"
-                      placeholder="يوسف وائل"
+                      placeholder="Youssef Wally"
                       required
                     />
                   </div>
                   <div className="col-md-6">
-                    <label className="form-label">رقم الهاتف</label>
+                    <label className="form-label">Phone Number</label>
                     <input
                       type="tel"
                       className="form-control rounded-3"
@@ -291,59 +282,58 @@ function App() {
                   </div>
                   <div className="col-md-12">
                     <label className="form-label">
-                      العنوان بالتفصيل (السويس)
+                      Detailed Address (Suez City)
                     </label>
                     <input
                       type="text"
                       className="form-control rounded-3"
-                      placeholder="شارع الجيش - برج..."
+                      placeholder="El-Geish St. - Building..."
                       required
                     />
                   </div>
                 </div>
 
-                <h5 className="mt-5 mb-4 border-bottom pb-2 fw-bold">
-                  طريقة الدفع
+                <h5 className="mt-5 mb-4 border-bottom pb-2 fw-bold text-primary">
+                  Payment Method
                 </h5>
-                <div className="form-check mb-3">
+                <div className="form-check p-3 bg-light rounded-3 border">
                   <input
-                    className="form-check-input"
+                    className="form-check-input ms-1"
                     type="radio"
                     name="payment"
                     id="cash"
                     checked
                     readOnly
                   />
-                  <label className="form-check-input-label" htmlFor="cash">
-                    الدفع عند الاستلام (Cash on Delivery)
+                  <label className="form-check-label ms-4" htmlFor="cash">
+                    Cash on Delivery (COD)
                   </label>
                 </div>
               </div>
             </div>
 
-            {/* ملخص الطلب */}
             <div className="col-md-4">
-              <div className="card shadow-sm border-0 rounded-4 p-4 bg-light">
-                <h5 className="fw-bold mb-3">ملخص الطلب</h5>
+              <div className="card shadow-sm border-0 rounded-4 p-4 bg-white border-top border-primary border-5">
+                <h5 className="fw-bold mb-3">Order Summary</h5>
                 <div className="d-flex justify-content-between mb-2">
-                  <span>عدد المنتجات:</span>
+                  <span>Items:</span>
                   <span className="fw-bold">{cart.length}</span>
                 </div>
                 <div className="d-flex justify-content-between mb-3 border-top pt-2 fs-5 fw-bold text-primary">
-                  <span>الإجمالي الإجمالي:</span>
+                  <span>Total Amount:</span>
                   <span>{total.toFixed(2)} EGP</span>
                 </div>
                 <button
-                  className="btn btn-success w-100 rounded-pill py-3 fw-bold"
+                  className="btn btn-success w-100 rounded-pill py-3 fw-bold shadow"
                   onClick={() => {
                     alert(
-                      "تم استلام طلبك بنجاح! فريق السويس إلكترونيكس هيكلمك في خلال ساعة.",
+                      "Order Received Successfully! Our Suez Electronics team will contact you within an hour.",
                     );
                     setCart([]);
                     setPage("home");
                   }}
                 >
-                  تأكيد الطلب ✅
+                  Confirm Order ✅
                 </button>
               </div>
             </div>
@@ -351,38 +341,36 @@ function App() {
         </div>
       )}
 
+      {/* Home Page */}
       {page === "home" && (
         <div className="animate__animated animate__fadeIn">
-          {/* Hero Section */}
           <section className="py-5 text-center bg-light rounded-5 m-3 shadow-sm border overflow-hidden position-relative">
-            <div className="container py-5 position-relative z-1">
+            <div className="container py-5 position-relative z-1 text-start px-md-5">
               <h1 className="display-3 fw-black text-dark mb-3">
-                مستقبلك التكنولوجي{" "}
-                <span className="text-primary">يبدأ هنا</span>
+                Your Future <span className="text-primary">Starts Here</span>
               </h1>
               <p
-                className="lead text-secondary mb-5 mx-auto"
+                className="lead text-secondary mb-5"
                 style={{ maxWidth: "700px" }}
               >
-                أكبر تشكيلة من اللابتوبات، الموبايلات، والإكسسوارات الأصلية في
-                السويس. جودة عالمية.. بأسعار محلية.
+                The biggest collection of laptops, phones, and original accessories in 
+                Suez City. Global quality at local prices.
               </p>
-              <div className="d-flex justify-content-center gap-3">
+              <div className="d-flex gap-3">
                 <button
                   onClick={() => setPage("products")}
                   className="btn btn-primary btn-lg px-5 rounded-pill shadow"
                 >
-                  تسوق الآن ⚡
+                  Shop Now ⚡
                 </button>
                 <button
                   onClick={() => setPage("about")}
                   className="btn btn-outline-dark btn-lg px-5 rounded-pill"
                 >
-                  تعرف علينا
+                  Learn More
                 </button>
               </div>
             </div>
-            {/* شكل جمالي في الخلفية */}
             <div
               className="position-absolute top-0 start-0 w-100 h-100 opacity-25"
               style={{
@@ -394,33 +382,32 @@ function App() {
             ></div>
           </section>
 
-          {/* Features Section */}
           <div className="container my-5">
             <div className="row g-4 text-center">
               <div className="col-md-4">
                 <div className="p-4 rounded-4 bg-white shadow-sm border h-100">
                   <div className="fs-1 mb-2">🚀</div>
-                  <h5 className="fw-bold">توصيل سريع</h5>
+                  <h5 className="fw-bold">Fast Delivery</h5>
                   <p className="text-muted small">
-                    داخل السويس خلال 24 ساعة فقط
+                    Inside Suez City within 24 hours only.
                   </p>
                 </div>
               </div>
               <div className="col-md-4">
                 <div className="p-4 rounded-4 bg-white shadow-sm border h-100">
                   <div className="fs-1 mb-2">🛡️</div>
-                  <h5 className="fw-bold">ضمان حقيقي</h5>
+                  <h5 className="fw-bold">Real Warranty</h5>
                   <p className="text-muted small">
-                    ضمان استبدال واسترجاع ضد عيوب الصناعة
+                    Replacement and return guarantee against manufacturing defects.
                   </p>
                 </div>
               </div>
               <div className="col-md-4">
                 <div className="p-4 rounded-4 bg-white shadow-sm border h-100">
                   <div className="fs-1 mb-2">💳</div>
-                  <h5 className="fw-bold ">دفع عند الاستلام</h5>
+                  <h5 className="fw-bold ">Cash on Delivery</h5>
                   <p className="text-muted small">
-                    لا تحتاج لفيزا.. ادفع لما تستلم وتطمن
+                    No credit card needed.. Pay only when you receive your order.
                   </p>
                 </div>
               </div>
@@ -429,15 +416,14 @@ function App() {
         </div>
       )}
 
-      {/* 🔵 صفحة تفاصيل المنتج */}
+      {/* Product Details Page */}
       {page === "details" && selectedProduct && (
-        <div className="container mt-5 mb-5">
-          {/* زرار الرجوع - ركز هنا القوس اتصلح */}
+        <div className="container mt-5 mb-5 text-start">
           <button
-            className="btn  btn-outline-dark mt-1 rounded-pill px-4 fw-bold"
+            className="btn btn-outline-dark mt-1 rounded-pill px-4 fw-bold mb-4"
             onClick={() => setPage("products")}
           >
-            ← رجوع للمنتجات
+            ← Back to Products
           </button>
 
           <div className="row g-5 bg-white p-4 p-md-5 rounded-5 shadow-sm border">
@@ -450,25 +436,22 @@ function App() {
               />
             </div>
 
-            <div
-              className="col-md-6 d-flex flex-column justify-content-center text-end"
-              dir="rtl"
-            >
+            <div className="col-md-6 d-flex flex-column justify-content-center">
               <h1 className="display-5 fw-bold mb-3">{selectedProduct.name}</h1>
               <h2 className="text-primary fw-bold mb-4">
-                {selectedProduct.price} EGP
+                {selectedProduct.price.toLocaleString()} EGP
               </h2>
 
               <p className="lead text-secondary mb-4">
                 {selectedProduct.description ||
-                  "أفضل اختيار من Suez Electronics لضمان الجودة والأداء."}
+                  "The best choice from Suez Electronics to ensure quality and performance."}
               </p>
 
-              <div className="bg-light p-3 rounded-4 mb-4 text-start">
+              <div className="bg-light p-3 rounded-4 mb-4">
                 <ul className="list-unstyled mb-0">
-                  <li className="mb-2">✅ ضمان لمدة عام كامل</li>
-                  <li className="mb-2">✅ شحن سريع في السويس</li>
-                  <li>✅ الدفع عند الاستلام</li>
+                  <li className="mb-2">✅ 1-Year Authorized Warranty</li>
+                  <li className="mb-2">✅ Fast Delivery in Suez</li>
+                  <li>✅ Cash on Delivery available</li>
                 </ul>
               </div>
 
@@ -476,65 +459,65 @@ function App() {
                 className="btn btn-primary btn-lg rounded-pill py-3 shadow-sm fw-bold"
                 onClick={() => addToCart(selectedProduct)}
               >
-                إضافة إلى العربة 🛒
+                Add to Cart 🛒
               </button>
             </div>
           </div>
         </div>
       )}
-      {/* 🔵 صفحة About Us */}
+
+      {/* About Page */}
       {page === "about" && (
-        <div className="container mt-5 mb-5 animate__animated animate__fadeIn">
-          {/* الجزء العلوي - الهوية */}
+        <div className="container mt-5 mb-5 animate__animated animate__fadeIn text-start">
           <div className="row align-items-center bg-white p-5 rounded-5 shadow-sm border mb-5">
             <div className="col-md-6">
               <h1 className="display-4 fw-bold text-primary mb-4">
-                Suez Electronics{" "}
+                Suez Electronics
               </h1>
               <p className="lead text-secondary">
-                نحن في **Suez Electronics**، فخورون بأننا الوجهة الأولى لعشاق
-                التكنولوجيا في مدينة السويس الباسلة. بدأت رحلتنا برؤية بسيطة:
-                توفير أحدث الأجهزة العالمية بأسعار تنافسية وخدمة ما بعد البيع
-                تليق بجمهورنا.
+                At **Suez Electronics**, we are proud to be the first destination for 
+                tech enthusiasts in the heroic city of Suez. Our journey started with a simple vision: 
+                to provide the latest global devices at competitive prices and a 
+                customer service that suits our audience.
               </p>
               <p className="text-muted">
-                منذ عام 2024، ونحن نسعى لتطوير تجربة التسوق الإلكتروني لنصل
-                إليكم أينما كنتم، مع ضمان الجودة والأصالة لكل منتج.
+                Since 2024, we have been striving to develop the e-commerce experience 
+                to reach you wherever you are, while ensuring quality and authenticity 
+                for every product.
               </p>
             </div>
             <div className="col-md-6 text-center">
-              <div className="p-4 bg-light rounded-5 border-dashed border-2">
+              <div className="p-4 bg-light rounded-5 border border-primary border-2 border-dashed">
                 <h2 className="text-primary fw-black">100% Original</h2>
-                <p className="mb-0">جميع منتجاتنا بضمان الوكيل المعتمد</p>
+                <p className="mb-0">All our products come with authorized agent warranty</p>
               </div>
             </div>
           </div>
 
-          {/* الجزء السفلي - التواصل */}
           <div className="row g-4 text-center">
             <div className="col-md-4">
-              <div className="card h-100 border-0 shadow-sm p-4 rounded-4 hover-top">
+              <div className="card h-100 border-0 shadow-sm p-4 rounded-4">
                 <div className="fs-1 mb-3">📍</div>
-                <h5 className="fw-bold">العنوان</h5>
+                <h5 className="fw-bold">Address</h5>
                 <p className="text-muted">
-                  السويس - شارع الجيش - برج الإلكترونيات
+                  Suez - El Geish St. - Electronics Tower
                 </p>
               </div>
             </div>
 
             <div className="col-md-4">
-              <div className="card h-100 border-0 shadow-sm p-4 rounded-4 hover-top">
+              <div className="card h-100 border-0 shadow-sm p-4 rounded-4">
                 <div className="fs-1 mb-3">📞</div>
-                <h5 className="fw-bold">اتصل بنا</h5>
+                <h5 className="fw-bold">Call Us</h5>
                 <p className="text-primary fw-bold fs-5">0100-XXXX-XXX</p>
-                <p className="text-muted">متاحين من 10 صباحاً لـ 10 مساءً</p>
+                <p className="text-muted">Available from 10 AM to 10 PM</p>
               </div>
             </div>
 
             <div className="col-md-4">
-              <div className="card h-100 border-0 shadow-sm p-4 rounded-4 hover-top">
+              <div className="card h-100 border-0 shadow-sm p-4 rounded-4">
                 <div className="fs-1 mb-3">📧</div>
-                <h5 className="fw-bold">البريد الإلكتروني</h5>
+                <h5 className="fw-bold">Email</h5>
                 <p className="text-muted">info@suezelectronics.com</p>
               </div>
             </div>
@@ -542,12 +525,11 @@ function App() {
         </div>
       )}
 
-      {/* 🔵 صفحة المنتجات */}
-      {/* --- صفحة المنتجات --- */}
+      {/* Products Page */}
       {page === "products" && (
         <div className="container mt-4 mb-5">
-          <h2 className="text-center mb-4 fw-bold">Our Products</h2>
-          <div className="row g-4">
+          <h2 className="text-center mb-5 fw-bold">Explore Our Gear</h2>
+          <div className="row g-4 text-start">
             {products.map((product) => (
               <div className="col-md-3" key={product.id}>
                 <div className="card h-100 p-3 shadow-sm border-0 rounded-4">
@@ -577,10 +559,10 @@ function App() {
                       {product.name}
                     </h5>
                     <p className="text-primary fw-bold fs-5">
-                      {product.price} EGP
+                      {product.price.toLocaleString()} EGP
                     </p>
                     <button
-                      className="btn btn-primary w-100 rounded-pill mt-auto"
+                      className="btn btn-primary w-100 rounded-pill mt-auto shadow-sm"
                       onClick={() => addToCart(product)}
                     >
                       Add to Cart 🛒
@@ -588,28 +570,26 @@ function App() {
                   </div>
                 </div>
               </div>
-            ))}{" "}
+            ))}
           </div>
         </div>
       )}
 
-      {/* 🔵 صفحة الكارت */}
+      {/* Cart Page */}
       {page === "cart" && (
-        <div className="container mt-5 mb-5">
+        <div className="container mt-5 mb-5 text-start animate__animated animate__fadeIn">
           <div className="row">
-            {/* Cart Items */}
             <div className="col-lg-7">
               <h4 className="mb-4 fw-bold">
                 Shopping Cart ({cart.length} items)
               </h4>
 
               {cart.length === 0 ? (
-                <div className="alert alert-info text-center py-5">
-                  <p className="mb-0">Your cart is empty</p>
+                <div className="alert alert-info text-center py-5 border-0 rounded-4">
+                  <p className="mb-0 fs-5">Your cart is empty 😢</p>
                   <button
-                    className="btn mt-3"
+                    className="btn mt-3 rounded-pill px-4 btn-primary"
                     onClick={() => setPage("products")}
-                    style={{ backgroundColor: "#5B5EFF", color: "white" }}
                   >
                     Continue Shopping
                   </button>
@@ -619,10 +599,9 @@ function App() {
                   {cart.map((item, index) => (
                     <div
                       key={index}
-                      className="card border-0 shadow-sm mb-3 p-3"
+                      className="card border-0 shadow-sm mb-3 p-3 rounded-4"
                     >
                       <div className="row g-3 align-items-center">
-                        {/* Product Image */}
                         <div className="col-md-2">
                           <img
                             src={item.img}
@@ -630,62 +609,29 @@ function App() {
                             style={{
                               width: "100%",
                               height: "100px",
-                              objectFit: "cover",
+                              objectFit: "contain",
                               borderRadius: "8px",
                             }}
                           />
                         </div>
 
-                        {/* Product Info */}
                         <div className="col-md-6">
                           <h6 className="mb-1 fw-bold">{item.name}</h6>
                           <small className="text-muted d-block">
-                            Color: {item.color}
+                            Color: {item.color} | Size: {item.size}
                           </small>
-                          <small className="text-muted d-block mb-2">
-                            Size: {item.size}
-                          </small>
-                          <p
-                            className="mb-0 fw-bold"
-                            style={{ color: "#5B5EFF" }}
-                          >
-                            ${item.price}
+                          <p className="mb-0 fw-bold text-primary mt-1">
+                            {item.price.toLocaleString()} EGP
                           </p>
                         </div>
 
-                        {/* Quantity and Remove */}
                         <div className="col-md-4 d-flex justify-content-between align-items-center">
-                          <div
-                            className="input-group"
-                            style={{ width: "120px" }}
-                          >
-                            <button
-                              className="btn btn-outline-secondary btn-sm"
-                              onClick={() => updateQty(item.id, -1)}
-                            >
-                              −
-                            </button>
-
-                            <input
-                              type="text"
-                              className="form-control form-control-sm text-center"
-                              value={item.quantity || 1}
-                              readOnly
-                            />
-
-                            <button
-                              className="btn btn-outline-secondary btn-sm"
-                              onClick={() => updateQty(item.id, 1)}
-                            >
-                              +
-                            </button>
+                          <div className="input-group input-group-sm" style={{ width: "110px" }}>
+                            <button className="btn btn-outline-secondary" onClick={() => updateQty(item.id, -1)}>−</button>
+                            <span className="form-control text-center">{item.quantity || 1}</span>
+                            <button className="btn btn-outline-secondary" onClick={() => updateQty(item.id, 1)}>+</button>
                           </div>
-
-                          <button
-                            className="btn btn-sm text-danger"
-                            onClick={() => removeFromCart(index)}
-                            style={{ fontSize: "18px" }}
-                          >
+                          <button className="btn text-danger border-0" onClick={() => removeFromCart(index)}>
                             🗑️
                           </button>
                         </div>
@@ -696,71 +642,36 @@ function App() {
               )}
             </div>
 
-            {/* Order Summary */}
             {cart.length > 0 && (
               <div className="col-lg-5">
-                <div className="card border-0 shadow-sm p-4">
-                  {/* Promo Code */}
+                <div className="card border-0 shadow-sm p-4 rounded-4">
                   <div className="mb-4">
-                    <label className="form-label fw-bold">
-                      Have a promo code?
-                    </label>
+                    <label className="form-label fw-bold">Have a promo code?</label>
                     <div className="input-group">
-                      <input
-                        type="text"
-                        className="form-control"
-                        placeholder="Enter code here"
-                      />
-                      <button
-                        className="btn"
-                        style={{ backgroundColor: "#5B5EFF", color: "white" }}
-                      >
-                        Apply
-                      </button>
+                      <input type="text" className="form-control" placeholder="Enter code" />
+                      <button className="btn btn-primary">Apply</button>
                     </div>
                   </div>
 
-                  {/* Order Summary */}
                   <div className="border-top pt-3">
                     <div className="d-flex justify-content-between mb-2">
                       <span>Subtotal</span>
-                      <span>${subtotal.toFixed(2)}</span>
+                      <span>{subtotal.toLocaleString()} EGP</span>
                     </div>
                     <div className="d-flex justify-content-between mb-2">
                       <span>Shipping</span>
-                      <span>$0.00</span>
+                      <span className="text-success fw-bold">Free</span>
                     </div>
-                    <div className="d-flex justify-content-between mb-3">
-                      <span>Taxes</span>
-                      <span>${taxes.toFixed(2)}</span>
+                    <div className="d-flex justify-content-between mb-3 border-bottom pb-2">
+                      <span>Taxes (14%)</span>
+                      <span>{taxes.toLocaleString()} EGP</span>
                     </div>
-
-                    <div
-                      className="border-top pt-3 d-flex justify-content-between mb-4"
-                      style={{ fontSize: "18px", fontWeight: "bold" }}
-                    >
+                    <div className="d-flex justify-content-between mb-4 fs-5 fw-bold text-primary">
                       <span>Total</span>
-                      <span>${total.toFixed(2)}</span>
+                      <span>{total.toLocaleString()} EGP</span>
                     </div>
-
-                    {/* Checkout Buttons */}
-                    <button
-                      className="btn w-100 mb-3"
-                      style={{
-                        backgroundColor: "#5B5EFF",
-                        color: "white",
-                        fontWeight: "bold",
-                        fontSize: "16px",
-                      }}
-                      onClick={() => setPage("checkout")}
-                    >
-                      Proceed to checkout
-                    </button>
-                    <button
-                      className="btn btn-outline-secondary w-100"
-                      onClick={() => setPage("products")}
-                    >
-                      Continue shopping
+                    <button className="btn btn-primary w-100 py-3 rounded-pill fw-bold" onClick={() => setPage("checkout")}>
+                      Proceed to Checkout
                     </button>
                   </div>
                 </div>
